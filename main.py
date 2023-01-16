@@ -161,53 +161,74 @@ def benchmark_validity(contours, image):
 #def benchmark(): function that finds the benchmarks within the nail for measurement, and returns it's coordiinates
 def benchmark(img, original, nail_cords):
 
-	kernel = np.ones((5,5), np.uint8)
-	blur = cv2.GaussianBlur(img, (3,3), 0)
+	blur = cv2.GaussianBlur(img, (3, 3), 0)
+	thresh = cv2.threshold(blur, 45, 255, cv2.THRESH_BINARY_INV)[1]
+	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 1))
+	detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, benchmark_kernel, iterations = 2)
 
-	thresh = cv2.threshold(blur, 75, 255, cv2.THRESH_BINARY)[1]
+	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 3))
+	dilated = cv2.morphologyEx(detect_horizontal, cv2.MORPH_DILATE, benchmark_kernel2, iterations=3)
+
+	benchmark_cnts = imutils.grab_contours(cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
+	benchmark_cnts = sorted(benchmark_cnts, key = cv2.contourArea, reverse = True)[1:]
+	#cv2.drawContours(img, benchmark_cnts, -1, (0,255,0), 3)
+
+	benchmark1 = cv2.boundingRect(benchmark_cnts[0])
+	benchmark2 = cv2.boundingRect(benchmark_cnts[1])
+
+	cv2.rectangle(original, (benchmark1[0], benchmark1[1]), (benchmark1[0] + benchmark1[2], benchmark1[1] + benchmark1[3]), (0, 255, 0), 3)
+	cv2.rectangle(original, (benchmark2[0], benchmark2[1]), (benchmark2[0] + benchmark2[2], benchmark2[1] + benchmark2[3]), (0, 255, 0), 3)
+	# #benchmark_cnts = benchmark_cnts[0] if len(benchmark_cnts) == 2 else benchmark_cnts[1]
+	# horizontal_cnts_grip = sorted(benchmark_cnts, key = cv2.contourArea, reverse = True)[:2]
+	# benchmark_cnts = sorted(benchmark_cnts, key = cv2.contourArea, reverse = True)[2:]
+
+	# kernel = np.ones((5,5), np.uint8)
+	# blur = cv2.GaussianBlur(img, (3,3), 0)
+
+	# thresh = cv2.threshold(blur, 75, 255, cv2.THRESH_BINARY)[1]
 
 
-	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21,21))
-	opening = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations = 3)
-	cnts= cv2.findContours(opening, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	cnts = imutils.grab_contours(cnts)
-	#cv2.drawContours(original, cnts, -1, (0,255,0), 3)
-	good_cnts = []
-	for i, c in enumerate(cnts):
-		if cv2.contourArea(c) >= 35000 or cv2.contourArea(c) <= 2000:
-			#print(f"bad area is: {cv2.contourArea(c)}")
-			continue
-		else:
-			#print(f"good area is: {cv2.contourArea(c)}")
-			good_cnts.append(c)
-	cnts = []
+	# kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21,21))
+	# opening = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations = 3)
+	# cnts= cv2.findContours(opening, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	# cnts = imutils.grab_contours(cnts)
+	# #cv2.drawContours(original, cnts, -1, (0,255,0), 3)
+	# good_cnts = []
+	# for i, c in enumerate(cnts):
+	# 	if cv2.contourArea(c) >= 35000 or cv2.contourArea(c) <= 2000:
+	# 		#print(f"bad area is: {cv2.contourArea(c)}")
+	# 		continue
+	# 	else:
+	# 		#print(f"good area is: {cv2.contourArea(c)}")
+	# 		good_cnts.append(c)
+	# cnts = []
 
-	print(f"DETECTED {len(good_cnts)} POTENTIAL BENCHMARKS")
-	if len(good_cnts) == 3:
+	# print(f"DETECTED {len(good_cnts)} POTENTIAL BENCHMARKS")
+	# if len(good_cnts) == 3:
 
-		x,y,w,h = benchmark_validity(good_cnts, original)
-		#cnts = sorted(new_cnts, key = cv2.contourArea)[0:1]
-		#x,y,w,h = cv2.boundingRect(cnts[0])
-	elif len(good_cnts) >= 1 and len(good_cnts) < 3:
-		cnts = sorted(good_cnts, key=cv2.contourArea, reverse = True)[:1]
-		x,y,w,h = cv2.boundingRect(cnts[0])
-	elif len(good_cnts) > 3 and len(good_cnts) <=6:
-		x,y,w,h = benchmark_validity(good_cnts, original)
-		#cnts = sorted(good_cnts, key = cv2.contourArea, reverse = True)[0:1]
-		#x,y,w,h = cv2.boundingRect(cnts[0])
-	else:
-		x,y,w,h = (0,0,0,0)
+	# 	x,y,w,h = benchmark_validity(good_cnts, original)
+	# 	#cnts = sorted(new_cnts, key = cv2.contourArea)[0:1]
+	# 	#x,y,w,h = cv2.boundingRect(cnts[0])
+	# elif len(good_cnts) >= 1 and len(good_cnts) < 3:
+	# 	cnts = sorted(good_cnts, key=cv2.contourArea, reverse = True)[:1]
+	# 	x,y,w,h = cv2.boundingRect(cnts[0])
+	# elif len(good_cnts) > 3 and len(good_cnts) <=6:
+	# 	x,y,w,h = benchmark_validity(good_cnts, original)
+	# 	#cnts = sorted(good_cnts, key = cv2.contourArea, reverse = True)[0:1]
+	# 	#x,y,w,h = cv2.boundingRect(cnts[0])
+	# else:
+	# 	x,y,w,h = (0,0,0,0)
 
-	return x,y,w,h
-	good_contours=[]
-	for x in cnts:
-		if cv2.contourArea(x) < 25000:
-			good_contours.append(x)
-	final_benchmark = good_contours[0]
-	x,y,w,h = cv2.boundingRect(final_benchmark)
-	cv2.rectangle(original, (x, y), (x + w, y + h), (0, 255, 0), 3) #this just draws the rectangle on the image
-	plot(original)
-	return x,y,w,h
+	# return x,y,w,h
+	# good_contours=[]
+	# for x in cnts:
+	# 	if cv2.contourArea(x) < 25000:
+	# 		good_contours.append(x)
+	# final_benchmark = good_contours[0]
+	# x,y,w,h = cv2.boundingRect(final_benchmark)
+	# cv2.rectangle(original, (x, y), (x + w, y + h), (0, 255, 0), 3) #this just draws the rectangle on the image
+	# plot(original)
+	return benchmark1, benchmark2
 
 
 #def fill_rectangle(): function that fills every pixel within a rectangle with white pixels (255), so that we can focus on contours outside
@@ -295,11 +316,9 @@ def fill_rectangle(image, rectangle):
 
 	return lines
 
-def height_of_tool(coordinates, contours):
-	exterior_contours = np.delete(contours, np.where(contours[:, 0]))
 
 #def find_nail(): first step in our program, finds the contours inside the nail, and then returns the minimum enclosing rectangle of that nail
-def find_nail(image, sigma=.33):
+def find_grips(image, sigma=.33):
 	imgCopy = copy.deepcopy(image)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	blur = cv2.GaussianBlur(gray, (3,3), 0)
@@ -317,6 +336,7 @@ def find_nail(image, sigma=.33):
 	horizontal_cnts = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	horizontal_cnts = horizontal_cnts[0] if len(horizontal_cnts) == 2 else horizontal_cnts[1]
 	horizontal_cnts_grip = sorted(horizontal_cnts, key = cv2.contourArea, reverse = True)[:2]
+	horizontal_cnts = sorted(horizontal_cnts, key = cv2.contourArea, reverse = True)[2:]
 
 	contour_list = []
 	for c in horizontal_cnts_grip:
@@ -327,16 +347,25 @@ def find_nail(image, sigma=.33):
 		#temp = temp[(temp[:, 0] >= 1200) | (temp[:, 0] <= 1000)]
 	
 		#cv2.drawContours(imgCopy, [temp], -1, (0,255,0), 3)
-
-	grip1 = cv2.boundingRect(contour_list[0])
-	grip2 = cv2.boundingRect(contour_list[1])
-	cv2.rectangle(imgCopy, (grip1[0], grip1[1]), (grip1[0]+grip1[2], grip1[1]+grip1[3]), (0, 0, 255), 3)
-	cv2.rectangle(imgCopy, (grip2[0], grip2[1]), (grip2[0]+grip2[2], grip2[1]+grip2[3]), (255, 0, 0), 3)
-
+	
 
 	full_cnts = imutils.grab_contours(cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
 	full_cnts = sorted(full_cnts, key = cv2.contourArea, reverse = True)[:int(len(full_cnts)*.8)]
 
+	contours = np.concatenate(full_cnts, axis=0)
+	contours = contours[:, 0, :]
+
+	if len(contour_list) < 2:
+		return (0,0,0,0), (0,0, 0, 0), (0,0,0,0), (contours)
+
+	grip1 = cv2.boundingRect(contour_list[0])
+	grip2 = cv2.boundingRect(contour_list[1])
+
+	cv2.rectangle(image, (grip1[0], grip1[1]), (grip1[0]+grip1[2], grip1[1]+grip1[3]), (0, 0, 255), 3)
+	cv2.rectangle(image, (grip2[0], grip2[1]), (grip2[0]+grip2[2], grip2[1]+grip2[3]), (255, 0, 0), 3)
+
+	width_cords = cv2.boundingRect(horizontal_cnts[0])
+	cv2.rectangle(image, (width_cords[0], width_cords[1]), (width_cords[0]+ width_cords[2], width_cords[1] + width_cords[3]), (255,0, 0), 3)
 	#y_contours = imutils.grab_contours(cv2.findContours(sobely, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE))
 
 
@@ -397,21 +426,17 @@ def find_nail(image, sigma=.33):
 	# x1,y1, w1, h1 = cv2.boundingRect(top_cnts[0])
 	# x2, y2, w2, h2 = cv2.boundingRect(bottom_cnts[0])
 	
-	contours = np.concatenate(full_cnts, axis=0)
-	contours = contours[:, 0, :]
+
 	#contours = np.delete(contours, np.where((contours[:, 0] >= 1550) | (contours[:, 0] <= 900)), axis = 0)
 	#contours = np.delete(contours, np.where((contours[:, 1] <= 600) | (contours[:, 1] >= 1500)), axis = 0)
-	nail_cords = cv2.boundingRect(contours)
-	cv2.drawContours(imgCopy, [contours], -1, (255, 0, 0), 3)
-
+	#nail_cords = cv2.boundingRect(contours)
+	#cv2.drawContours(imgCopy, [contours], -1, (255, 0, 0), 3)
 	#cv2.rectangle(image, (x1,y1), (x1+w1, y1+h1), (0,255,0), 3)
 	#cv2.rectangle(image, (x2,y2), (x2+w2, y2+h2), (255,0,0), 3)
-	cv2.rectangle(image, (nail_cords[0], nail_cords[1]), (nail_cords[0]+nail_cords[2], nail_cords[1]+nail_cords[3]), (0, 0, 255), 3)
+	#cv2.rectangle(image, (nail_cords[0], nail_cords[1]), (nail_cords[0]+nail_cords[2], nail_cords[1]+nail_cords[3]), (0, 0, 255), 3)
 	#return ((x1, y1, w1, h1), (x2, y2, w2, h2))
-	plot(image)
-	plot(imgCopy)
-	exit()
-	return nail_cords, contours, 
+
+	return ((grip1), (grip2), (width_cords), (contours))
 
 
 def calculate(path):
@@ -420,25 +445,55 @@ def calculate(path):
 	if not path.endswith(".jpg"):
 		return "UNRECOGNIZED FORMAT"
 	#top_rect, bottom_rect = find_nail(image)
-	nail_coords, nail_contours = find_nail(image)
-	if nail_coords == (0, 0, 0, 0):
+	grip1, grip2, width_cords, nail_cnts = find_grips(image)
+	if grip1 == (0, 0, 0, 0) or grip2 == (0,0,0,0):
 		return ("invalid", 0, 0, 0, 0)
 	#if top_rect == (0,0,0,0) or bottom_rect == (0,0,0,0):
 		#return image #(path[11:], 0, 0, 0)
-	height_of_tool(nail_coords, nail_contours)
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	x,y,w,h = benchmark(gray, image, nail_coords)
-	cv2.rectangle(image, (x,y), (x+w, y+h), (255,0,0), 3)
-	width = w
-	benchmark_height = h
-	distance = bottom_rect[1] - top_rect[1] + top_rect[3]
+	nail_width = width_cords[2]
 
-	cv2.line(image, (645, top_rect[1]+top_rect[3]), (645, bottom_rect[1]), (0, 0, 255), 5)
-	cv2.line(image, (x, y+150), (x+w, y+150), (0, 255, 0), 3)
-	cv2.line(image, (x+int((w/2)), y), (x+int(w/2), y+h), (0,0,255), 3)
-	image = cv2.putText(image, "Distance in pixels: " + str(distance), (100, top_rect[1]+top_rect[1]+75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0, 255), 3)
-	image = cv2.putText(image, "Width of Nail in pixels: " + str(width), (x+w+150, y+100), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (100,255, 100), 3)
-	image = cv2.putText(image, "Height of benchmark in pixels: " + str(benchmark_height), (x+w+150, y+350), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (50, 25, 255), 3)
+	if grip1[1] < grip2[1]:
+		grip_distance = abs(grip1[1] + grip1[3] - grip2[1])
+		top_grip = grip1
+		bottom_grip = grip2
+	else:
+		grip_distance = abs(grip2[1] + grip2[3] - grip1[1])
+		top_grip = grip2
+		bottom_grip = grip1
+	
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+	benchmark1, benchmark2 = benchmark(gray, image, nail_cnts)
+
+	if benchmark1[1] < benchmark2[1]:
+		benchmark_distance = abs(benchmark1[1] + benchmark1[3] - benchmark2[1])
+		top_benchmark = benchmark1
+		bottom_benchmark = benchmark2
+	else:
+		benchmark_distance = abs(benchmark2[1] + benchmark2[3] - benchmark1[1])
+		top_benchmark = benchmark2
+		bottom_benchmark = benchmark1
+
+
+
+	#gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	#x,y,w,h = benchmark(gray, image, nail_coords)
+	#cv2.rectangle(image, (x,y), (x+w, y+h), (255,0,0), 3)
+	#width = w
+	#benchmark_height = h
+	#distance = bottom_rect[1] - top_rect[1] + top_rect[3]
+
+	cv2.line(image, (850, top_grip[1]+top_grip[3]), (850, bottom_grip[1]), (0, 255, 0), 5)
+	image = cv2.putText(image, "Distance in pixels: " + str(grip_distance), (275, top_grip[1]+top_grip[3] + 75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
+	cv2.line(image, (width_cords[0], width_cords[1]+ 40), (width_cords[0] + width_cords[2], width_cords[1] + 40), (0, 255, 0), 3)
+	image = cv2.putText(image, "Width of Nail in pixels: " + str(nail_width), (width_cords[0] + width_cords[2] + 50, width_cords[1] + int(width_cords[3]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0,255), 4)
+	cv2.line(image, (top_benchmark[0] + int(top_benchmark[2]/2), top_benchmark[1] + top_benchmark[3]), (top_benchmark[0] + int(top_benchmark[2]/2), bottom_benchmark[1]), (0, 0, 255), 4)
+	image = cv2.putText(image, "Benchmark distance in pixels: " + str(benchmark_distance), (top_benchmark[0] + top_benchmark[2] + 50, top_benchmark[1] + int(benchmark_distance/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
+	#cv2.line(image, (x, y+150), (x+w, y+150), (0, 255, 0), 3)
+	#cv2.line(image, (x+int((w/2)), y), (x+int(w/2), y+h), (0,0,255), 3)
+	#image = cv2.putText(image, "Distance in pixels: " + str(distance), (100, top_rect[1]+top_rect[1]+75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0, 255), 3)
+	#image = cv2.putText(image, "Width of Nail in pixels: " + str(width), (x+w+150, y+100), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (100,255, 100), 3)
+	#image = cv2.putText(image, "Height of benchmark in pixels: " + str(benchmark_height), (x+w+150, y+350), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (50, 25, 255), 3)
 	plot(image)
 	return image
 	#return (path[11:], distance, width, benchmark_height)
