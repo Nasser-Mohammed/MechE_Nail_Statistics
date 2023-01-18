@@ -163,18 +163,87 @@ def benchmark(img, original, nail_cords):
 
 	blur = cv2.GaussianBlur(img, (3, 3), 0)
 	thresh = cv2.threshold(blur, 45, 255, cv2.THRESH_BINARY_INV)[1]
-	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 1))
+	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 1)) #(50,1)
 	detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, benchmark_kernel, iterations = 2)
 
 	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 3))
-	dilated = cv2.morphologyEx(detect_horizontal, cv2.MORPH_DILATE, benchmark_kernel2, iterations=3)
+	second_transformation = cv2.morphologyEx(detect_horizontal, cv2.MORPH_OPEN, benchmark_kernel2, iterations=3)
+	dilation_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+	final_dilation = cv2.morphologyEx(second_transformation, cv2.MORPH_DILATE, dilation_kernel, iterations = 1)
 
-	benchmark_cnts = imutils.grab_contours(cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
+	benchmark_cnts = imutils.grab_contours(cv2.findContours(final_dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
 	benchmark_cnts = sorted(benchmark_cnts, key = cv2.contourArea, reverse = True)[1:]
 	#cv2.drawContours(img, benchmark_cnts, -1, (0,255,0), 3)
+	if len(benchmark_cnts) <= 1:
+		retry_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40,1))
+		retry_benchmark = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, retry_kernel, iterations = 2)
+		retry_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
+		retry_benchmark2 = cv2.morphologyEx(retry_benchmark, cv2.MORPH_DILATE, retry_kernel2, iterations = 2)
+		retry_cnts = imutils.grab_contours(cv2.findContours(retry_benchmark2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
 
-	benchmark1 = cv2.boundingRect(benchmark_cnts[0])
-	benchmark2 = cv2.boundingRect(benchmark_cnts[1])
+		if len(retry_cnts) == 0:
+			return (0,0,0,0), (0,0,0,0)
+		retry_cnts = sorted(retry_cnts, key = cv2.contourArea, reverse = True)
+		new_cnts = []
+		#cv2.drawContours(original, retry_cnts, -1, (0,255,0), 3)
+		#plot(original)
+		place = 0
+		for c in retry_cnts:
+			temp = copy.deepcopy(c)
+			temp = np.concatenate(temp, axis = 0)
+			temp = temp[(temp[:, 0] >= nail_cords[0] - 15) & (temp[:, 0] <= nail_cords[0] + nail_cords[2] + 15)]
+			if cv2.boundingRect(temp) != (0,0,0,0):
+				new_cnts.append(c)
+			#cv2.drawContours(original, [temp], -1, (0,255,0), 3)
+			#plot(original)
+		rect_list = [cv2.boundingRect(cnt) for cnt in new_cnts]
+
+		rect_list = sorted(rect_list, key = lambda x:x[1] + x[3])
+		
+		
+		if len(rect_list) > 4:
+			return (0,0,0,0), (0,0,0,0)
+		elif len(rect_list) == 4:
+			benchmark1 = rect_list[1]
+			benchmark2 = rect_list[2]
+		elif len(rect_list) == 3:
+			top = .65
+			bottom = .35
+			tmp_list = copy.deepcopy(rect_list)
+			for x in range(5):
+				if len(tmp_list) == 3:
+					tmp_list = [rectangle for rectangle in rect_list if rectangle[1] >= int(bottom*img.shape[1]) and rectangle[1] + rectangle[3] <= int(top*img.shape[1])]
+					top += 0.05
+					bottom -= 0.05
+					if len(tmp_list) == 2:
+						benchmark1 = tmp_list[0]
+						benchmark2 = tmp_list[1]
+			return (0,0,0,0), (0,0,0,0)
+		elif len(rect_list) == 2:
+				benchmark1 = rect_list[0]
+				benchmark2 = rect_list[1]
+		else:
+			return (0,0,0,0), (0,0,0,0)
+		# if len(new_cnts) < 2:
+		# 	return (0,0,0,0), (0,0,0,0)
+		# elif len(new_cnts) == 2:
+		# 	benchmark1 = cv2.boundingRect(new_cnts[0])
+		# 	benchmark2 = cv2.boundingRect(new_cnts[1])
+		# elif len(new_cnts) > 2:
+		# 	rect_list = [cv2.boundingRect(cnts) for cnts in new_cnts]
+		# 	rect_list = [rect for rect in rect_list if rect != (0,0,0,0)]
+		# 	lower_quarter = int(.10*img.shape[1])
+		# 	upper_quarter = int(.90*img.shape[1])
+		# 	rect_list2 = [cnt for cnt in rect_list if cnt[1] + cnt[3] < upper_quarter and cnt[1] > lower_quarter]
+		# 	sizes = [rect[1]*rect[3] for rect in rect_list2]
+		# 	if len(rect_list2) > 2:
+		# 		pass
+		# 	else:
+		# 		return (0,0,0,0), (0,0,0,0)
+			
+	else:
+		benchmark1 = cv2.boundingRect(benchmark_cnts[0])
+		benchmark2 = cv2.boundingRect(benchmark_cnts[1])
 
 	cv2.rectangle(original, (benchmark1[0], benchmark1[1]), (benchmark1[0] + benchmark1[2], benchmark1[1] + benchmark1[3]), (0, 255, 0), 3)
 	cv2.rectangle(original, (benchmark2[0], benchmark2[1]), (benchmark2[0] + benchmark2[2], benchmark2[1] + benchmark2[3]), (0, 255, 0), 3)
@@ -226,7 +295,8 @@ def benchmark(img, original, nail_cords):
 	# 		good_contours.append(x)
 	# final_benchmark = good_contours[0]
 	# x,y,w,h = cv2.boundingRect(final_benchmark)
-	# cv2.rectangle(original, (x, y), (x + w, y + h), (0, 255, 0), 3) #this just draws the rectangle on the image
+	#cv2.rectangle(original, (benchmark1[0], benchmark1[1]), (benchmark1[0] + benchmark1[2], benchmark1[1]+benchmark1[3]), (0, 255, 0), 3) #this just draws the rectangle on the image
+	#cv2.rectangle(original, (benchmark2[0], benchmark2[1]), (benchmark2[0] + benchmark2[2], benchmark2[1]+benchmark2[3]), (0, 255, 0), 3)
 	# plot(original)
 	return benchmark1, benchmark2
 
@@ -251,72 +321,6 @@ def fill_rectangle(image, rectangle):
 
 
 
-	# for theta in range(361):
-	# 	values.append((int(line_distance*cos(theta*pi/180)),int(line_distance*sin(theta*pi/180))))
-
-	# for index, point in enumerate(c):
-		#if offset + index_tmp != index:
-			#print(f"current index is: {index} target is {index_tmp + offset}")
-			#continue
-		#cords = []
-		#point = point[0] 	#this just gets the actual point because it is in the form [[x,y]] so we make it [x,y]
-		#line_segment = [] 	#temporary line segment, we only add if it meets our length requirement
-		#index_tmp = 0 		#reset this variable, it it basically how far along the contour list we made it
-
-
-
-
-		#print(f"{point[1]}, {values[5][1]}")
-		# cords = [(x[0]+point[0], point[1] - x[1]) for x in values if point[0] + x[0] < 2048 and point[0] + x[0] >= 0 and point[1] - x[1] < 2048 and point[1] -x[1] >= 0]
-		# cords = [*set(cords)]
-		# print(f"FOUND {len(cords)} POTENTIAL LINES AT POINT ({point[0]}, {point[1]})")
-		# offset = 1
-		# for i, pos in enumerate(cords):
-		# 	m = 0.0
-		# 	m = pos[1]/pos[0]
-		# 	if offset+index >= len(c):
-		# 		return lines
-		# 	if offset >= 100:
-		# 		index_tmp = index
-		# 		break
-		# 	if m == 0.0:
-		# 		print(f"slope of: {m} causes error")
-		# 		offset += 1
-		# 		continue
-		# 	# print(f"line has slope of: {m}")
-		# 	# print(f"checking contour: {c[offset+index, 0]}")
-		# 	#print(f"point on radial line related to our countor: x is: {int(c[offset+index, 0, 1]/m)}, y is: {int(m*c[offset+index, 0, 0])}")
-		# 	# if c[index+offset, 0, 1]/m < 0.0005 or c[index+offset, 0, 0]*m < 0.0005:
-		# 	# 	offset += 1
-		# 	# 	continue
-		# 	dx = c[offset+index, 0, 1]/m
-		# 	dy = c[offset+index, 0, 0]*m
-		# 	if dy == 0 or dx == 0:
-		# 		offset += 1
-		# 		continue
-		# 	x_diff = abs(pos[0] -int(dx))
-		# 	y_diff = abs(pos[1] - int(dy))
-		# 	# if dx > 0.0001:
-		# 	# 	x_diff = abs(pos[0]-int(dx))
-		# 	# else:
-		# 	# 	offset += 1
-		# 	# 	continue
-		# 	# if dy > 0.0001:
-		# 	# 	y_diff = abs(pos[1] - int(dy))
-		# 	# else:
-		# 	# 	offset += 1
-		# 	# 	continue
-
-		# 	if x_diff <= sigma and y_diff <= sigma:
-		# 		line_segment.append(c[offset+index, 0])
-		# 	offset += 1
-		# index_tmp = index
-		# if len(line_segment) >= 5:
-		# 	lines.append(line_segment)
-
-	return lines
-
-
 #def find_nail(): first step in our program, finds the contours inside the nail, and then returns the minimum enclosing rectangle of that nail
 def find_grips(image, sigma=.33):
 	imgCopy = copy.deepcopy(image)
@@ -331,126 +335,66 @@ def find_grips(image, sigma=.33):
 	#edged = cv2.Canny(blur, 25, 255)
 	edged = cv2.Canny(blur, 15, 225)
 	thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-	horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 1))
-	detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations = 2)
-	horizontal_cnts = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	horizontal_cnts = horizontal_cnts[0] if len(horizontal_cnts) == 2 else horizontal_cnts[1]
-	horizontal_cnts_grip = sorted(horizontal_cnts, key = cv2.contourArea, reverse = True)[:2]
-	horizontal_cnts = sorted(horizontal_cnts, key = cv2.contourArea, reverse = True)[2:]
-
-	contour_list = []
-	for c in horizontal_cnts_grip:
-		temp = np.concatenate(c,axis = 0)
-		#temp = np.delete(temp, np.where((temp[:, 0] >= 1000) & (temp[:, 0] <=1200)), axis = 0)
-		temp = temp[(temp[:, 0] >= 1300) | (temp[:, 0] <= 1000)]
-		contour_list.append(temp)
-		#temp = temp[(temp[:, 0] >= 1200) | (temp[:, 0] <= 1000)]
-	
-		#cv2.drawContours(imgCopy, [temp], -1, (0,255,0), 3)
+	grip_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (100, 3))
+	detect_grip = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, grip_kernel, iterations = 2)
 	
 
-	full_cnts = imutils.grab_contours(cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
-	full_cnts = sorted(full_cnts, key = cv2.contourArea, reverse = True)[:int(len(full_cnts)*.8)]
+	fill_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (75, 75))
+	filled_grip = cv2.morphologyEx(detect_grip, cv2.MORPH_CLOSE, fill_kernel, iterations = 3)
 
-	contours = np.concatenate(full_cnts, axis=0)
-	contours = contours[:, 0, :]
+	grip_cnts = imutils.grab_contours(cv2.findContours(filled_grip, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
+	grip_cnts = sorted(grip_cnts, key = cv2.contourArea, reverse = True)[:2]
 
-	if len(contour_list) < 2:
-		return (0,0,0,0), (0,0, 0, 0), (0,0,0,0), (contours)
-
-	grip1 = cv2.boundingRect(contour_list[0])
-	grip2 = cv2.boundingRect(contour_list[1])
-
-	cv2.rectangle(image, (grip1[0], grip1[1]), (grip1[0]+grip1[2], grip1[1]+grip1[3]), (0, 0, 255), 3)
-	cv2.rectangle(image, (grip2[0], grip2[1]), (grip2[0]+grip2[2], grip2[1]+grip2[3]), (255, 0, 0), 3)
-
-	width_cords = cv2.boundingRect(horizontal_cnts[0])
-	cv2.rectangle(image, (width_cords[0], width_cords[1]), (width_cords[0]+ width_cords[2], width_cords[1] + width_cords[3]), (255,0, 0), 3)
-	#y_contours = imutils.grab_contours(cv2.findContours(sobely, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE))
-
-
-	#top_img, bottom_img = cut_half(blur)
-
-	#thresh_top = cv2.threshold(top_img, 45, 255, cv2.THRESH_BINARY)[1]
-	#thresh_bottom = cv2.threshold(bottom_img, 45, 255, cv2.THRESH_BINARY)[1]
-
-	#thresh_top = cv2.Canny(top_img, 30, 255)
-	#thresh_bottom = cv2.Canny(bottom_img, 30, 255)
-
-
-	# top_cnts = cv2.findContours(thresh_top, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	# top_cnts = imutils.grab_contours(top_cnts)
-	# top_cnts = sorted(top_cnts, key = cv2.contourArea, reverse = True)#[:1]
-	# temp = copy.deepcopy(image)
-
-	# array = top_cnts[0]
-	# array = array[:, 0, :]
-	# print(f"original size: {array.shape}")
-
-	#top_cnts = [np.delete(array, np.where((array[:, 1] >= 300) | (array[:, 0] >= 1600) | (array[:, 0] <= 435)), axis = 0)]
-
-
-	# bottom_cnts = cv2.findContours(thresh_bottom, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	# bottom_cnts = imutils.grab_contours(bottom_cnts)
-	# bottom_cnts = sorted(bottom_cnts, key = cv2.contourArea, reverse = True)#[:1]
-	# array = bottom_cnts[0]
-	# array = array[:, 0, :]
-	#bottom_cnts = [np.delete(array, np.where((array[:, 0] >= 1600) | (array[:, 0] <= 150)), axis = 0)]
-	#cv2.drawContours(temp, top_cnts, -1, (0,0,255), 3)
-
-	# lines_top = line_score(top_cnts[0])
-	# print(f"program detected {len(lines_top)} line segments of top image")
-
-	# lines_bottom = line_score(bottom_cnts[0])
-	# print(f"program detected {len(lines_bottom)} line segments of bottom image")
-
-
-	# if len(lines_top) <= 0:
-	# 	return ((0,0,0,0), (0,0,0,0))
-	# if len(lines_bottom) <= 0:
-	# 	return ((0,0,0,0), (0,0,0,0))
-	# lines_top = np.concatenate(lines_top)#.tolist()
-	# lines_bottom = np.concatenate(lines_bottom)#.tolist()
-
-	#cv2.drawContours(image, [lines_top], -1, (0,0,255), 3)
-	#plot(image)
-	# for x in lines_top:
-	# 	cords = np.stack(x, axis =0)
-	# 	cv2.drawContours(image, [cords], -1,(0,255,0), 3)
-
-	# for y in lines_bottom:
-	# 	cords = np.stack(y, axis=0)
-	# 	cv2.drawContours(image, [cords], -1, (255, 0, 0), 3)
-
-	#cv2.drawContours(image, tmp, -1, (0,255, 0), 5)
-	# x1,y1, w1, h1 = cv2.boundingRect(top_cnts[0])
-	# x2, y2, w2, h2 = cv2.boundingRect(bottom_cnts[0])
+	nail_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 35))
+	fill_nail = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, nail_kernel, iterations = 3)
 	
+	nail_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 700))
+	detect_nail = cv2.morphologyEx(fill_nail, cv2.MORPH_OPEN, nail_kernel2, iterations = 3)
+	nail_cnts = imutils.grab_contours(cv2.findContours(detect_nail, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
 
-	#contours = np.delete(contours, np.where((contours[:, 0] >= 1550) | (contours[:, 0] <= 900)), axis = 0)
-	#contours = np.delete(contours, np.where((contours[:, 1] <= 600) | (contours[:, 1] >= 1500)), axis = 0)
-	#nail_cords = cv2.boundingRect(contours)
-	#cv2.drawContours(imgCopy, [contours], -1, (255, 0, 0), 3)
-	#cv2.rectangle(image, (x1,y1), (x1+w1, y1+h1), (0,255,0), 3)
-	#cv2.rectangle(image, (x2,y2), (x2+w2, y2+h2), (255,0,0), 3)
-	#cv2.rectangle(image, (nail_cords[0], nail_cords[1]), (nail_cords[0]+nail_cords[2], nail_cords[1]+nail_cords[3]), (0, 0, 255), 3)
-	#return ((x1, y1, w1, h1), (x2, y2, w2, h2))
+	if len(nail_cnts) >= 1:
+		nail_cords = cv2.boundingRect(nail_cnts[0])
+	else:
+		nail_cords = (0, 0, 0, 0)
 
-	return ((grip1), (grip2), (width_cords), (contours))
+	# full_cnts = imutils.grab_contours(cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
+	# full_cnts = sorted(full_cnts, key = cv2.contourArea, reverse = True)[:int(len(full_cnts)*.8)]
+
+	# contours = np.concatenate(full_cnts, axis=0)
+	# contours = contours[:, 0, :]
+
+	if len(grip_cnts) < 2:
+		grip1 = (0,0,0,0)
+		grip2 = (0,0,0,0)
+	else:
+		grip1 = cv2.boundingRect(grip_cnts[0])
+		grip2 = cv2.boundingRect(grip_cnts[1])
+
+	
+	if grip1 != (0,0,0,0):
+		cv2.rectangle(image, (grip1[0], grip1[1]), (grip1[0]+grip1[2], grip1[1]+grip1[3]), (0, 0, 255), 3)
+	if grip2 != (0,0,0,0):
+		cv2.rectangle(image, (grip2[0], grip2[1]), (grip2[0]+grip2[2], grip2[1]+grip2[3]), (255, 0, 0), 3)
+	if nail_cords != (0,0,0,0):
+		cv2.rectangle(image, (nail_cords[0], nail_cords[1]), (nail_cords[0]+ nail_cords[2], nail_cords[1] + nail_cords[3]), (255,0, 0), 3)
+
+
+	return ((grip1), (grip2), (nail_cords))
 
 
 def calculate(path):
 	image = cv2.imread(path)
+	preserved_image = copy.deepcopy(image)
 	#change line below for image format
 	if not path.endswith(".jpg"):
 		return "UNRECOGNIZED FORMAT"
 	#top_rect, bottom_rect = find_nail(image)
-	grip1, grip2, width_cords, nail_cnts = find_grips(image)
-	if grip1 == (0, 0, 0, 0) or grip2 == (0,0,0,0):
-		return ("invalid", 0, 0, 0, 0)
+	grip1, grip2, nail_width_cords = find_grips(image)
+	# if grip1 == (0, 0, 0, 0) or grip2 == (0,0,0,0):
+	# 	return ("invalid", 0, 0, 0, 0)
 	#if top_rect == (0,0,0,0) or bottom_rect == (0,0,0,0):
 		#return image #(path[11:], 0, 0, 0)
-	nail_width = width_cords[2]
+	nail_width = nail_width_cords[2]
 
 	if grip1[1] < grip2[1]:
 		grip_distance = abs(grip1[1] + grip1[3] - grip2[1])
@@ -461,9 +405,9 @@ def calculate(path):
 		top_grip = grip2
 		bottom_grip = grip1
 	
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	gray = cv2.cvtColor(preserved_image, cv2.COLOR_BGR2GRAY)
 
-	benchmark1, benchmark2 = benchmark(gray, image, nail_cnts)
+	benchmark1, benchmark2 = benchmark(gray, image, nail_width_cords)
 
 	if benchmark1[1] < benchmark2[1]:
 		benchmark_distance = abs(benchmark1[1] + benchmark1[3] - benchmark2[1])
@@ -475,27 +419,15 @@ def calculate(path):
 		bottom_benchmark = benchmark1
 
 
-
-	#gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	#x,y,w,h = benchmark(gray, image, nail_coords)
-	#cv2.rectangle(image, (x,y), (x+w, y+h), (255,0,0), 3)
-	#width = w
-	#benchmark_height = h
-	#distance = bottom_rect[1] - top_rect[1] + top_rect[3]
-
 	cv2.line(image, (850, top_grip[1]+top_grip[3]), (850, bottom_grip[1]), (0, 255, 0), 5)
 	image = cv2.putText(image, "Distance in pixels: " + str(grip_distance), (275, top_grip[1]+top_grip[3] + 75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
-	cv2.line(image, (width_cords[0], width_cords[1]+ 40), (width_cords[0] + width_cords[2], width_cords[1] + 40), (0, 255, 0), 3)
-	image = cv2.putText(image, "Width of Nail in pixels: " + str(nail_width), (width_cords[0] + width_cords[2] + 50, width_cords[1] + int(width_cords[3]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0,255), 4)
+	cv2.line(image, (nail_width_cords[0], int(nail_width_cords[3]/2)), (nail_width_cords[0] + nail_width_cords[2], int(nail_width_cords[3]/2)), (0, 255, 0), 3)
+	image = cv2.putText(image, "Width of Nail in pixels: " + str(nail_width), (nail_width_cords[0] + nail_width_cords[2] + 50, int(nail_width_cords[3]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0,255), 4)
 	cv2.line(image, (top_benchmark[0] + int(top_benchmark[2]/2), top_benchmark[1] + top_benchmark[3]), (top_benchmark[0] + int(top_benchmark[2]/2), bottom_benchmark[1]), (0, 0, 255), 4)
 	image = cv2.putText(image, "Benchmark distance in pixels: " + str(benchmark_distance), (top_benchmark[0] + top_benchmark[2] + 50, top_benchmark[1] + int(benchmark_distance/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
-	#cv2.line(image, (x, y+150), (x+w, y+150), (0, 255, 0), 3)
-	#cv2.line(image, (x+int((w/2)), y), (x+int(w/2), y+h), (0,0,255), 3)
-	#image = cv2.putText(image, "Distance in pixels: " + str(distance), (100, top_rect[1]+top_rect[1]+75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0, 255), 3)
-	#image = cv2.putText(image, "Width of Nail in pixels: " + str(width), (x+w+150, y+100), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (100,255, 100), 3)
-	#image = cv2.putText(image, "Height of benchmark in pixels: " + str(benchmark_height), (x+w+150, y+350), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (50, 25, 255), 3)
-	plot(image)
+
 	return image
+	#return (path[11:], grip_distance, nail_width, benchmark_distance)
 	#return (path[11:], distance, width, benchmark_height)
 
 
@@ -507,7 +439,7 @@ def main():
 
 	print(f"STARTING EXECUTION......")
 	start = timer()
-	path = "./ImagesNewCam"
+	path = "./3"
 	files = os.listdir(path)
 	arg = [path+"/"+x for x in files if os.path.isfile(path+"/"+x)]
 	num_of_files = len(os.listdir(path))
@@ -519,15 +451,21 @@ def main():
 	pool = mp.Pool(processes = processes)
 	count = 0
 
-	#frame_size = (2048, 2048)
-	#fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-	#out = cv2.VideoWriter("output_video2.mp4", fourcc, 15, frame_size, isColor = True)
+	frame_size = (2448, 2048)
+	fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+	out = cv2.VideoWriter("dataset3_vid.mp4", fourcc, 15, frame_size, isColor = True)
+	image_list = []
 	for images in glob.iglob(f"{path}/*"):
-		if count >= 5:
-			break
 		image = calculate(images)
-		#out.write(image)
-		#to_csv(image, "./outputData.csv")
+		image_list.append(image)
+		#cv2.resize(image, (2048, 2048))
+		#image_list.append(image)
+	#to_csv(("ImageName", "GripDistance", "NailWidth", "BenchmarkDistance"), "./outputData.csv")
+	#for x in image_list:
+	for x in image_list:
+		out.write(x)
+	out.release()
+		#to_csv(x, "./outputData.csv")
 	# results = pool.map_async(calculate, arg,  chunksize = int(len(arg)/processes))
 
 	dataList = []
