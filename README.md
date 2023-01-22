@@ -67,5 +67,7 @@ For mac/linux:
  ## Output
  You should find the output you picked in your desktop folder, this means that it should also show up on your home screen somewhere, so it is convenient to check whether or not you received an output. 
 
-
+## Questions
+ If you have any questions, feel free to contact me (Nasser Mohammed)
+ at nmoha13@lsu.edu
 
