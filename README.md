@@ -31,11 +31,11 @@ Now that you have the path, we can create the conda environment. To do this open
 
 For windows:
   ```
-  conda env create -f ENTER_PATH_HERE\environment.yaml
+  conda env create -f ENTER_PATH_HERE\environment.yml
   ```
 For mac/linux:
   ```
-  conda env create -f ENTER_PATH_HERE/environment.yaml
+  conda env create -f ENTER_PATH_HERE/environment.yml
   ```
   
   ## Usage
