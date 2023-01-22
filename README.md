@@ -65,7 +65,7 @@ For mac/linux:
  ```
  NOTE: Note in the last example, the usage of ```' '``` because of the space between ```Jerry's``` and ```Computer```
  ## Output
- 
+ You should find the output you picked in your desktop folder, this means that it should also show up on your home screen somewhere, so it is convenient to check whether or not you received an output. 
 
 
 
