@@ -118,7 +118,7 @@ def benchmark(img, original, nail_cords):
 						benchmark1 = tmp_list[0]
 						benchmark2 = tmp_list[1]
 						break
-			if tmp_list > 2:
+			if len(tmp_list) > 2 or len(tmp_list) == 0:
 				return (0,0,0,0), (0,0,0,0)
 		elif len(rect_list) == 2:
 				benchmark1 = rect_list[0]
