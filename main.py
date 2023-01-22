@@ -23,11 +23,12 @@ def is_contour_rect(c):
 		return False
 
 #def compile_video(): helper function to compile videos on the dataset
-def compile_video(images, dSet):
+def compile_video(images, dSet, outputpath):
+
 	gray = cv2.cvtColor(images[0][4], cv2.COLOR_BGR2GRAY)
 	frame_size = gray.shape[1], gray.shape[0]
 	fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-	out = cv2.VideoWriter(dSet + "video.mp4", fourcc, 15, frame_size, isColor = True)
+	out = cv2.VideoWriter(outputpath + dSet + "video.mp4", fourcc, 15, frame_size, isColor = True)
 	for i, x in enumerate(images):
 		out.write(x[4])
 	out.release()
@@ -146,7 +147,6 @@ def find_grips(image):
 
 	fill_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (75, 75))
 	filled_grip = cv2.morphologyEx(detect_grip, cv2.MORPH_CLOSE, fill_kernel, iterations = 3)
-
 	grip_cnts = imutils.grab_contours(cv2.findContours(filled_grip, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
 	grip_cnts = sorted(grip_cnts, key = cv2.contourArea, reverse = True)[:2]
 
@@ -176,7 +176,6 @@ def find_grips(image):
 		cv2.rectangle(image, (grip2[0], grip2[1]), (grip2[0]+grip2[2], grip2[1]+grip2[3]), (255, 0, 0), 3)
 	if nail_cords != (0,0,0,0):
 		cv2.rectangle(image, (nail_cords[0], nail_cords[1]), (nail_cords[0]+ nail_cords[2], nail_cords[1] + nail_cords[3]), (255,0, 0), 3)
-
 
 	return ((grip1), (grip2), (nail_cords))
 
@@ -253,8 +252,13 @@ def main():
 	operatingSys = os.name
 	if operatingSys == "nt":
 		dSet = path.split("\\")[-1]
+		outputpath = os.path.normpath(os.path.expanduser("~/Desktop"))
+		outputpath = outputpath + "\\"
 	else:
 		dSet = path.split("/")[-1]
+		outputpath = os.path.expanduser("~/Desktop")
+		outputpath = outputpath + "/"
+
 
 	
 	print(f"STARTING EXECUTION......")
@@ -288,12 +292,12 @@ def main():
 	sorted_data = sorted(sorted_data, key = sorter)
 
 	if args.output == "video" or args.output == "Video":
-		compile_video(sorted_data, dSet)
+		compile_video(sorted_data, dSet, outputpath)
 	elif args.output == "csv" or args.output == "CSV":
-		to_csv([(s[0], s[1], s[2], s[3]) for s in sorted_data], "./"+"metrics_for_"+ dSet +".csv")
+		to_csv([(s[0], s[1], s[2], s[3]) for s in sorted_data], outputpath+"metrics_for_"+ dSet +".csv")
 	else:
-		compile_video(sorted_data, dSet)
-		to_csv([(s[0], s[1], s[2], s[3]) for s in sorted_data], "./"+"metrics_for_"+ dSet +".csv")
+		compile_video(sorted_data, dSet, outputpath)
+		to_csv([(s[0], s[1], s[2], s[3]) for s in sorted_data], outputpath+"metrics_for_"+ dSet +".csv")
 	final_time = timer()
 	print(f"Program took {final_time-start} seconds to process images")
 
