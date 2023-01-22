@@ -1,2 +1,2 @@
-# MechE_Nail_Statistics
+# Nail Metrics
 ## About
