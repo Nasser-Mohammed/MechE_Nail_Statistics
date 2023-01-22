@@ -117,7 +117,9 @@ def benchmark(img, original, nail_cords):
 					if len(tmp_list) == 2:
 						benchmark1 = tmp_list[0]
 						benchmark2 = tmp_list[1]
-			return (0,0,0,0), (0,0,0,0)
+						break
+			if tmp_list > 2:
+				return (0,0,0,0), (0,0,0,0)
 		elif len(rect_list) == 2:
 				benchmark1 = rect_list[0]
 				benchmark2 = rect_list[1]
@@ -133,18 +135,10 @@ def benchmark(img, original, nail_cords):
 	return benchmark1, benchmark2
 
 #def find_nail(): first step in our program, finds the contours inside the nail, and then returns the minimum enclosing rectangle of that nail
-def find_grips(image, sigma=.33):
-	imgCopy = copy.deepcopy(image)
+def find_grips(image):
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	blur = cv2.GaussianBlur(gray, (3,3), 0)
-	median = np.median(blur)
-	lower = int(max(0, (1.0-sigma)*median))
-	upper = int(min(255, (1.0+sigma)*median))
-	#print(f"threshold parameters for this image edge detection are: upper({upper}), lower({lower})")
-	#edged = cv2.Canny(blur, lower, upper)
-	#top, bottom = cut_half(blur)
-	#edged = cv2.Canny(blur, 25, 255)
-	edged = cv2.Canny(blur, 15, 225)
+
 	thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 	grip_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (100, 3))
 	detect_grip = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, grip_kernel, iterations = 2)
@@ -198,7 +192,7 @@ def calculate(path):
 	#top_rect, bottom_rect = find_nail(image)
 	grip1, grip2, nail_width_cords = find_grips(image)
 	if grip1 == (0, 0, 0, 0) or grip2 == (0,0,0,0):
-		return ("error:couldn't find grips", 0, 0, 0, 0)
+		return ("error:couldn't find grips", 0, 0, 0, image)
 	#if top_rect == (0,0,0,0) or bottom_rect == (0,0,0,0):
 		#return image #(path[11:], 0, 0, 0)
 	nail_width = nail_width_cords[2]
