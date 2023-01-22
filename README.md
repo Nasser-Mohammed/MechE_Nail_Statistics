@@ -2,6 +2,9 @@
 ## About
 Nail_Metrics is an OpenCV based program created for experimental research in Material Science for the Mechanical Engineering Department at LSU.
 
+## Note
+OpenCV through conda does
+
 ## Installation
 To install Nail_Metrics, simply download the files to the desired directory by clicking on "<> Code" in green near the top right, then "Download ZIP", unzip the files into the folder you want, and you will have the program along with the environment file. On windows, when you click "Extract All" and it asks you where to extract the files to, I recommend deleting the "MechE_Nail_Statistics-main" as it will save the folder with the files into another folder named that, so you will have a redundant folder.
 
