@@ -12,7 +12,9 @@ Follow this tutorial to install conda: https://docs.conda.io/projects/conda/en/l
 #### For Mac/Linux
 Follow this tutorial to install conda: https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html , you can skip step 2. To find the .pkg file for anaconda, go to your "Downloads" folder. After step 5, to find conda, you can either search for anaconda or miniconda in your computer's search bar, or you can search terminal in your computer's search bar. If you had installation issues check this website for troubleshooting: https://docs.anaconda.com/anaconda/user-guide/troubleshooting/ 
 
-''' hello '''
+''' 
+hello
+'''
 
 
 
