@@ -39,7 +39,7 @@ For mac/linux:
   ```
   
   ## Usage
-  Before using the program, you must activate the ```nm-py39``` environment. To do this enter:
+  Before using the program, you must activate the ```nm-py39``` environment. You are required to do this everytime you exit the conda terminal. To do this enter:
   ```
   conda activate nm-py39
   ``` 
