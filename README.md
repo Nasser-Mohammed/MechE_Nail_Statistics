@@ -44,7 +44,7 @@ For mac/linux:
   ### Running the Program
   When you're ready to run the program, first you will need to find the path to the image folder you wish to preform calculations on. To do this the steps are the same as above for finding a path name, except you are looking for the image folder. Once you have that found, you will enter the line below into your terminal, replacing ENTER_PATH_TO_PROGRAM_HERE with the path to the program, and ENTER_PATH_TO_IMAGES_HERE with the path to the image folder. Note that there are spaces after 'python' 'path to program' 'path to images' 'options'.
   ### Options
-  The options tab allows for the user to pick what kind of output they want. Entering "csv" will output only a csv file of the nail metrics, "video" will output only a video of the found metrics, "all" will output both a video and csv file. Note you do not use "" when entering the options, for example if we wanted the csv file only we would simply put: ```csv``` in the options entry.
+  The options entry allows for the user to pick what kind of output they want. Entering "csv" will output only a csv file of the nail metrics, "video" will output only a video of the found metrics, "all" will output both a video and csv file. Note you do not use "" when entering the options, for example if we wanted the csv file only we would simply put: ```csv``` in the options entry.
   NOTE: If either of your paths have spaces in them, you will need to put '' around the path that has spaces, so a path on windows like ```C:\Users\Owner``` is fine but ```C:\Users\Owner\Nail Program```, will need to be entered as ```'C:\Users\Owner\Nail Program'```, same applies for mac/linux. 
   For windows:
   ```
