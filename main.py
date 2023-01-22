@@ -234,6 +234,7 @@ def calculate(path):
 	image = cv2.putText(image, "Benchmark distance in pixels: " + str(benchmark_distance), (top_benchmark[0] + top_benchmark[2] + 50, top_benchmark[1] + int(benchmark_distance/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
 	path = path.split("_")[-1]
 	path = path.split(".")[0]
+	image = cv2.resize(image, None, fx = .5, fy = .5)
 	return (path, grip_distance, nail_width, benchmark_distance, image)
 
 
@@ -283,6 +284,7 @@ def main():
 	for index, data in enumerate(results.get()):
 		#print(f"data sample: {index}, Image name: {data[0]}, Grip Distance: {data[1]}, Nail Width: {data[2]}, Benchmark Height: {data[3]}")
 		sorted_data.append(data)
+	del results
 	sorted_data = sorted(sorted_data, key = sorter)
 
 	if args.output == "video" or args.output == "Video":
