@@ -26,9 +26,13 @@ NOTE: The end of your path, should be the name of the folder. By default this sh
 
 Now that you have the path, we can create the conda environment. To do this open up conda with the methods I provided in the conda installation section. Once conda is opened type in the following line (replacing ENTER_PATH_HERE with the path you have copied):
 For windows:
-  ```conda env create -f ENTER_PATH_HERE\environment.yaml```
+  ```
+  conda env create -f ENTER_PATH_HERE\environment.yaml
+  ```
 For mac/linux:
-  ```conda env create -f ENTER_PATH_HERE/environment.yaml```
+  ```
+  conda env create -f ENTER_PATH_HERE/environment.yaml
+  ```
   
   
 
