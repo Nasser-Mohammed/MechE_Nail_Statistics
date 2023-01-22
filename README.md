@@ -6,7 +6,7 @@ Nail_Metrics is an OpenCV based program created for experimental research in Mat
 OpenCV and imutils through conda do not work. So pip will be used instead. 
 
 ## Installation
-To install Nail_Metrics, simply download the files to the desired directory by clicking on ```diff + <> Code``` in green near the top right, then "Download ZIP", unzip the files into the folder you want, and you will have the program along with the environment file. On windows, when you click "Extract All" and it asks you where to extract the files to, I recommend deleting the "MechE_Nail_Statistics-main" as it will save the folder with the files into another folder named that, so you will have a redundant folder.
+To install Nail_Metrics, simply download the files to the desired directory by clicking on ```<> Code``` in green near the top right, then "Download ZIP", unzip the files into the folder you want, and you will have the program along with the environment file. On windows, when you click "Extract All" and it asks you where to extract the files to, I recommend deleting the "MechE_Nail_Statistics-main" as it will save the folder with the files into another folder named that, so you will have a redundant folder.
 
 ### Dependencies
 Nail_Metrics uses Anaconda to handle Python and it's dependencies, which are found in environment_windows.yml and environement_mac.yml. To setup the nm-py39 Python environment, install and configure Anaconda or Miniconda. I recommend Miniconda as it does not include many unnecessary packages. Read below for instructions on how to do this.
