@@ -31,19 +31,19 @@ Now that you have the path, we can create the conda environment. To do this open
 
 For windows:
   ```
-  conda env create -f ENTER_PATH_HERE\environment.yml
+  conda env create -f ENTER_PATH_HERE\environment_windows.yml
   ```
 For mac/linux:
   ```
-  conda env create -f ENTER_PATH_HERE/environment.yml
+  conda env create -f ENTER_PATH_HERE/environment_mac.yml
   ```
   
   ## Usage
-  Before using the program, you must activate the ```nm-py310``` environment. To do this enter:
+  Before using the program, you must activate the ```nm-py39``` environment. To do this enter:
   ```
-  conda activate nm-py310
+  conda activate nm-py39
   ``` 
-  You should see (nm-py310) as the first part of the line in the conda terminal. If you still see (base) then the environment was either created wrong, or you typed in the wrong command. Retry the steps above if that happens. 
+  You should see (nm-py39) as the first part of the line in the conda terminal. If you still see (base) then the environment was either created wrong, or you typed in the wrong command. Retry the steps above if that happens. 
   ### Running the Program
   When you're ready to run the program, first you will need to find the path to the image folder you wish to preform calculations on. To do this the steps are the same as above for finding a path name, except you are looking for the image folder. Once you have that found, you will enter the line below into your terminal, replacing ENTER_PATH_TO_PROGRAM_HERE with the path to the program, and ENTER_PATH_TO_IMAGES_HERE with the path to the image folder. Note that there are spaces after 'python' 'path to program' 'path to images' 'options'.
   ### Options
