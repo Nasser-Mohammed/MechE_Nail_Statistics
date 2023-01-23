@@ -19,13 +19,13 @@ Follow this tutorial to install conda: https://docs.conda.io/projects/conda/en/l
 
 
 
-After conda installation, first find the folder you downloaded this repository to, unless you changed the name it will be something similar to: "MechE_Nail_Statistics-main, once you have found this directory, double click into the folder where you will see ```main.py``` , ```environment_mac.yml``` , ```environment_windows.yml```, and ```readme.md```. You will need to copy the path to that folder, to do this:
+After conda installation, first find the folder you downloaded this repository to, unless you changed the name it will be something similar to: "MechE_Nail_Statistics-main, once you have found this directory, double click into the folder where you will see ```main.py``` , ```environment_mac.yml``` , ```environment_windows.yml```, and ```README.md```. You will need to copy the path to that folder, to do this:
 
 For windows follow this tutorial: https://www.howtogeek.com/670447/how-to-copy-the-full-path-of-a-file-on-windows-10/#:~:text=Here%27s%20how.,select%20%E2%80%9CCopy%20As%20Path.%E2%80%9D
 
 For mac/linux follow this tutorial: https://themacbeginner.com/copy-full-path-file-folder-finder-mac-osx/
 
-NOTE: The end of your path, should be the name of the folder. By default this should be "MechE_Nail_Statistics-main", if it is not, the next steps will not work. However, if you changed the folder name, it will need to end with whatever you changed it to. 
+NOTE: The end of your path, should be the name of the folder. By default this should be "MechE_Nail_Statistics-main", if it is not (and you didn't change the folder name), the next steps will not work. However, if you changed the folder name, it will need to end with whatever you changed it to. 
 
 Now that you have the path, we can create the conda environment. To do this open up conda with the methods I provided in the conda installation section. Once conda is opened type in the following line (replacing ENTER_PATH_HERE with the path you have copied):
 
