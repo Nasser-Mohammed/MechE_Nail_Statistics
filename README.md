@@ -3,10 +3,10 @@
 Nail_Metrics is an OpenCV based program created for experimental research in Material Science for the Mechanical Engineering Department at LSU.
 
 ## Note
-OpenCV and imutils through conda do not work. So pip will be used instead. 
+OpenCV and imutils downloaded through conda channel will not work. Allow for pip packages to override the packages installed through conda channels. 
 
 ## Installation
-To install Nail_Metrics, simply download the files to the desired directory by clicking on ```<> Code``` in green near the top right, then "Download ZIP", unzip the files into the folder you want, and you will have the program along with the environment file. On windows, when you click "Extract All" and it asks you where to extract the files to, I recommend deleting the "MechE_Nail_Statistics-main" as it will save the folder with the files into another folder named that, so you will have a redundant folder.
+To install Nail_Metrics, simply download the files to the desired directory by clicking on ```<> Code``` in green near the top right, then ```"Download ZIP"```, unzip the files into the folder you want, and you will have the program along with the environment file. On windows, when you click "Extract All" and it asks you where to extract the files to, I recommend deleting the ```"MechE_Nail_Statistics-main"``` as it will save the folder with the files into another folder named that, so you will have a redundant folder.
 
 ### Dependencies
 Nail_Metrics uses Anaconda to handle Python and it's dependencies, which are found in environment_windows.yml and environement_mac.yml. To setup the nm-py39 Python environment, install and configure Anaconda or Miniconda. I recommend Miniconda as it does not include many unnecessary packages. Read below for instructions on how to do this.
@@ -19,7 +19,7 @@ Follow this tutorial to install conda: https://docs.conda.io/projects/conda/en/l
 
 
 
-After conda installation, first find the folder you downloaded this code and the environment.yaml file to, unless you changed the name it will be something similar to: "MechE_Nail_Statistics-main, once you have found that directory, double click into the folder where you will see main.py and environment.yaml. You will need to copy the path to that folder, to do this:
+After conda installation, first find the folder you downloaded this repository to, unless you changed the name it will be something similar to: "MechE_Nail_Statistics-main, once you have found this directory, double click into the folder where you will see ```main.py``` , ```environment_mac.yml``` , ```environment_windows.yml```, and ```readme.md```. You will need to copy the path to that folder, to do this:
 
 For windows follow this tutorial: https://www.howtogeek.com/670447/how-to-copy-the-full-path-of-a-file-on-windows-10/#:~:text=Here%27s%20how.,select%20%E2%80%9CCopy%20As%20Path.%E2%80%9D
 
