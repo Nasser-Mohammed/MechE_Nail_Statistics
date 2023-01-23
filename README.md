@@ -68,8 +68,9 @@ For mac/linux:
  ```
  NOTE: Note in the last example, the usage of ```' '``` because of the space between ```Jerry's``` and ```Computer```
  ## Output
- You should find the output you picked in your desktop folder, this means that it should also show up on your home screen somewhere, so it is convenient to check whether or not you received an output. Below is an example of the produced video:
+ You will find the output option you passed in, in your desktop folder, this means that it should also show up on your home screen, so it is convenient to check whether or not you received an output. Be
 
+https://user-images.githubusercontent.com/81037208/214087964-025de51f-2491-4eaa-af75-d3729ba328cc.mp4
 
 
 ## Questions
