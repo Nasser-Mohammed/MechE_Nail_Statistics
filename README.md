@@ -72,14 +72,6 @@ For mac/linux:
 
 
 
-https://user-images.githubusercontent.com/81037208/213960679-c14893a8-1079-494d-b1e0-96abe77e9114.mp4
-
-
-
-
-
-
-
 ## Questions
  If you have any questions, feel free to contact me (Nasser Mohammed)
  at nmoha13@lsu.edu
