@@ -70,7 +70,11 @@ For mac/linux:
  ## Output
  You should find the output you picked in your desktop folder, this means that it should also show up on your home screen somewhere, so it is convenient to check whether or not you received an output. Below is an example of the produced video:
 
-https://user-images.githubusercontent.com/81037208/213958783-8908f901-0988-4176-8d8d-9ca8bbe433ee.mp4
+
+
+
+https://user-images.githubusercontent.com/81037208/213959202-b42d23a3-af07-4349-b563-58c27a4198aa.mp4
+
 
 
 
