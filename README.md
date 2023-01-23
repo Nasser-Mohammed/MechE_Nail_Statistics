@@ -49,6 +49,9 @@ For mac/linux:
   ### Options
   The options entry allows for the user to pick what kind of output they want. Entering ```csv``` will output only a csv file of the nail metrics, ```video``` will output only a video of the found metrics, ```all``` will output both a video and csv file. Note you do not use ```""``` around the option you end up choosing, for example if we wanted the csv file only we would simply put: ```csv``` in the options entry NOT ```"csv"```.
   NOTE: If either of your paths have spaces in them, you will need to put ```''``` around the path that has spaces, so a path on windows like ```C:\Users\Owner``` is fine but ```C:\Users\Owner\Nail Program```, will need to be entered as ```'C:\Users\Owner\Nail Program'```, since there is a space between ```Nail``` and ```Program``` in the program path, same applies for mac/linux, as well as for the image folder path. 
+  
+  ### How to print the output data on your terminal:
+  If you wish to see the data on your terminal, you will just need to add ```--feature``` after the ```output``` entry, if you don't want this, add ```--no-feature```
  
  ### For windows:
   ```
