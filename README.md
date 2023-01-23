@@ -69,7 +69,7 @@ For mac/linux:
  ```
  NOTE: Note in the last example, the usage of ```' '``` because of the space between ```Jerry's``` and ```Computer```
  
-   ### How to stop printing data the output data on your terminal:
+   ### How to stop printing the output data on your terminal:
   If you wish to see the data on your terminal, you will just need to add ```--no-feature``` after the ```options``` entry, it will by default print to the terminal.
  ## Output
  You will find the output option you passed in, in your desktop folder, this means that it should also show up on your home screen, so it is convenient to check whether or not you received an output. Be
