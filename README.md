@@ -73,7 +73,7 @@ For mac/linux:
  NOTE: Note in the last example, the usage of ```' '``` because of the space between ```Jerry's``` and ```Computer```
  
  ## Output
- You will find the output option you passed in, in your desktop folder, this means that it should also show up on your home screen, so it is convenient to check whether or not you received an output. Be
+ You will find the output option you passed in, in your desktop folder, this means that it should also show up on your home screen, so it is convenient to check whether or not you received an output.
 
 ## Questions
  If you have any questions, feel free to contact me (Nasser Mohammed)
