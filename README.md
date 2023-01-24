@@ -2,6 +2,8 @@
 ## About
 Nail_Metrics is an OpenCV based program created for experimental research in Material Science for the Mechanical Engineering Department at LSU. It utilizes multiprocessesing for faster execution.
 
+![New_Full_Stats](https://user-images.githubusercontent.com/81037208/214439587-1d8cb361-8102-44d5-b22e-04ba0dd6b949.png)
+
 ## Note
 OpenCV and imutils downloaded through conda channel will not work. Allow for pip packages to override the packages installed through conda channels. 
 
