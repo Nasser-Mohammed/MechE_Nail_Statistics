@@ -58,78 +58,117 @@ def to_csv(data, csv_path):
 		writer.writerows(data)
 		file.close()
 
-	
-#def benchmark(): function that finds the benchmarks within the nail for measurement, and returns it's coordiinates
-def benchmark(img, original, nail_cords):
+#def benchmark_validity(): helps ensure benchmark validity
+def benchmark_validity(nail_cords, benchmark1, benchmark2, top_grip, bottom_grip, original):
+	#will test if two benchmarks meet the standards: within nail coordinates, not contained within the same grips
+	if benchmark1[1] > benchmark2[1]:
+		top_bench = benchmark2
+		bottom_bench = benchmark1
+	else:
+		top_bench = benchmark1
+		bottom_bench = benchmark2
 
+	if top_bench[1] + top_bench[3] >= top_grip[1] + top_grip[3] + 50:
+		return (0,0,0,0), (0,0,0,0)
+	if bottom_bench[1] + bottom_bench[3] <= bottom_grip[1] - 50:
+		return (0,0,0,0), (0,0,0,0)
+	#if they pass the above conditions then they are in the grips
+
+	#below checks to see if they are on the same side, if they are, we are detecting incorrect benchmarks
+	if top_bench[1] < top_grip[1] + top_grip[3] and bottom_bench[1] < top_grip[1] + top_grip[3]:
+		return (0,0,0,0), (0,0,0,0)
+	if top_bench[1] > bottom_grip[1] and bottom_bench[1] > bottom_grip[1]:
+		return (0,0,0,0), (0,0,0,0)
+
+
+	return benchmark1, benchmark2
+
+#debugging tool
+def tempcheck(benchmark1, num):
+	if benchmark1 == (0,0,0,0):
+		print(f"failed to find contour on condition{num}")
+		return False
+	else:
+		return True
+
+#def benchmark(): function that finds the benchmarks within the nail for measurement, and returns it's coordinates
+def benchmark(img, original, nail_cords, top_grip, bottom_grip):
+	if nail_cords == (0,0,0,0):
+		return (0,0,0,0), (0,0,0,0)
+	cpy = copy.deepcopy(original)
 	blur = cv2.GaussianBlur(img, (3, 3), 0)
 	thresh = cv2.threshold(blur, 45, 255, cv2.THRESH_BINARY_INV)[1]
-	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 1)) #(50,1)
+
+	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (45, 1)) #(50,1)
 	detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, benchmark_kernel, iterations = 2)
 
-	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 3))
+
+	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 3)) #(30, 3)
 	second_transformation = cv2.morphologyEx(detect_horizontal, cv2.MORPH_OPEN, benchmark_kernel2, iterations=3)
-	dilation_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+
+	dilation_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20)) #(20,20)
 	final_dilation = cv2.morphologyEx(second_transformation, cv2.MORPH_DILATE, dilation_kernel, iterations = 1)
 
+
+
 	benchmark_cnts = imutils.grab_contours(cv2.findContours(final_dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
-	benchmark_cnts = sorted(benchmark_cnts, key = cv2.contourArea, reverse = True)[1:]
-	if len(benchmark_cnts) <= 1:
-		retry_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40,1))
-		retry_benchmark = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, retry_kernel, iterations = 2)
-		retry_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (20,20))
-		retry_benchmark2 = cv2.morphologyEx(retry_benchmark, cv2.MORPH_DILATE, retry_kernel2, iterations = 2)
-		
-		retry_cnts = imutils.grab_contours(cv2.findContours(retry_benchmark2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
-
-		if len(retry_cnts) == 0:
-			return (0,0,0,0), (0,0,0,0)
-		retry_cnts = sorted(retry_cnts, key = cv2.contourArea, reverse = True)
-		new_cnts = []
-		for c in retry_cnts:
-			temp = copy.deepcopy(c)
-			temp = np.concatenate(temp, axis = 0)
-			temp = temp[(temp[:, 0] >= nail_cords[0] - 15) & (temp[:, 0] <= nail_cords[0] + nail_cords[2] + 15)]
-			if cv2.boundingRect(temp) != (0,0,0,0):
-				new_cnts.append(c)
-
-		if len(new_cnts) == 0:
-			return (0,0,0,0), (0,0,0,0)
-		rect_list = [cv2.boundingRect(cnt) for cnt in new_cnts]
-
-		rect_list = sorted(rect_list, key = lambda x:x[1] + x[3])
-		
-		
-		if len(rect_list) > 4:
-			return (0,0,0,0), (0,0,0,0)
-		elif len(rect_list) == 4:
-			benchmark1 = rect_list[1]
-			benchmark2 = rect_list[2]
-
-		elif len(rect_list) == 3:
-			top = .65
-			bottom = .35
-			tmp_list = copy.deepcopy(rect_list)
-			while top <= .95 and bottom >= .05:
-				if len(tmp_list) == 3:
-					tmp_list = [rectangle for rectangle in rect_list if rectangle[1] >= int(bottom*img.shape[1]) and rectangle[1] + rectangle[3] <= int(top*img.shape[1])]
-					top += 0.05
-					bottom -= 0.05
-					if len(tmp_list) == 2:
-						benchmark1 = tmp_list[0]
-						benchmark2 = tmp_list[1]
-						break
-			if len(tmp_list) > 2 or len(tmp_list) == 0:
-				return (0,0,0,0), (0,0,0,0)
-		elif len(rect_list) == 2:
-				benchmark1 = rect_list[0]
-				benchmark2 = rect_list[1]
-		else:
-			return (0,0,0,0), (0,0,0,0)
-			
+	if len(benchmark_cnts) < 2:
+	# 	#we need to retry with lighter kernels
+		return (0,0,0,0), (0,0,0,0)
+	elif len(benchmark_cnts) == 2:
+		#we need to check if they're valid, by testing if they're in the nail, not contained within the same grips
+		benchmark1, benchmark2 = benchmark_validity(nail_cords, benchmark_cnts, top_grip, bottom_grip,original)
+		bl = tempcheck(benchmark1, 1)
+		if bl == False:
+			return (0,0,0,0),(0,0,0,0)
 	else:
-		benchmark1 = cv2.boundingRect(benchmark_cnts[0])
-		benchmark2 = cv2.boundingRect(benchmark_cnts[1])
+		#1) remove any contours not in the nail
+		rect_list = [cv2.boundingRect(c) for c in benchmark_cnts]
+		rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - 50 and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + 50]
+
+		#step 2) try to find benchmarks based off of contour size, ours are usuallly 11000 to 16000
+		if len(rect_list) > 2:
+			rect_list = [rect for rect in rect_list if int(rect[2]*rect[3]) <= 16500 and int(rect[2]*rect[3]) >= 8750]
+			if len(rect_list) < 2:
+				rect_list = [cv2.boundingRect(c) for c in benchmark_cnts]
+				rect_list = [rect for rect in rect_list if int(rect[2]*rect[3]) <= 17500 and int(rect[2]*rect[3]) >= 7500]
+				if len(rect_list) == 2:
+					benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip, original)
+					bl = tempcheck(benchmark1, 2)
+					if bl == False:
+						return (0,0,0,0), (0,0,0,0)
+				else:
+					return (0,0,0,0), (0,0,0,0)
+			elif len(rect_list) == 2:
+				benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip, original)
+				bl = tempcheck(benchmark1, 3)
+				if bl == False:
+					return (0,0,0,0),(0,0,0,0)
+
+			else:
+				rect_list = [rect for rect in rect_list if int(rect[2]*rect[3]) <= 16500 and int(rect[2]*rect[3]) >= 10000]
+				if len(rect_list) == 2:
+					benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip, original)
+					bl = tempcheck(benchmark1, 4)
+					if bl == False:
+						return (0,0,0,0), (0,0,0,0)
+				else:
+					return (0,0,0,0), (0,0,0,0)
+		elif len(rect_list) == 2:
+			benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip, original)
+			bl = tempcheck(benchmark1, 5)
+			if bl == False:
+				return (0,0,0,0), (0,0,0,0)
+		else:
+			rect_list = [cv2.boundingRect(c) for c in benchmark_cnts]
+			rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - 90 and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + 90]
+			if len(rect_list) == 2:
+				benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip, original)
+				bl = tempcheck(benchmark1, 6)
+				if bl == False:
+					return (0,0,0,0), (0,0,0,0)
+			else:
+				return (0,0,0,0), (0,0,0,0)
 
 	cv2.rectangle(original, (benchmark1[0], benchmark1[1]), (benchmark1[0] + benchmark1[2], benchmark1[1] + benchmark1[3]), (0, 255, 0), 3)
 	cv2.rectangle(original, (benchmark2[0], benchmark2[1]), (benchmark2[0] + benchmark2[2], benchmark2[1] + benchmark2[3]), (0, 255, 0), 3)
@@ -213,7 +252,7 @@ def calculate(path):
 	
 	gray = cv2.cvtColor(preserved_image, cv2.COLOR_BGR2GRAY)
 
-	benchmark1, benchmark2 = benchmark(gray, image, nail_width_cords)
+	benchmark1, benchmark2 = benchmark(gray, image, nail_width_cords, top_grip, bottom_grip)
 
 	if benchmark1[1] < benchmark2[1]:
 		benchmark_distance = abs(benchmark1[1] + benchmark1[3] - benchmark2[1])
@@ -225,8 +264,8 @@ def calculate(path):
 		bottom_benchmark = benchmark1
 
 
-	cv2.line(image, (850, top_grip[1]+top_grip[3]), (850, bottom_grip[1]), (0, 255, 0), 5)
-	image = cv2.putText(image, "Distance in pixels: " + str(grip_distance), (275, top_grip[1]+top_grip[3] + 75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
+	cv2.line(image, (top_grip[0]+ 75, top_grip[1]+top_grip[3]), (top_grip[0] + 75, bottom_grip[1]), (0, 255, 0), 5)
+	image = cv2.putText(image, "Distance in pixels: " + str(grip_distance), (top_grip[0] - 100, top_grip[1]+top_grip[3] + 75), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 0, 255), 4)
 	cv2.line(image, (nail_width_cords[0], int(nail_width_cords[3]/2)), (nail_width_cords[0] + nail_width_cords[2], int(nail_width_cords[3]/2)), (0, 255, 0), 3)
 	image = cv2.putText(image, "Width of Nail in pixels: " + str(nail_width), (nail_width_cords[0] + nail_width_cords[2] + 50, int(nail_width_cords[3]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0,0,255), 4)
 	cv2.line(image, (top_benchmark[0] + int(top_benchmark[2]/2), top_benchmark[1] + top_benchmark[3]), (top_benchmark[0] + int(top_benchmark[2]/2), bottom_benchmark[1]), (0, 0, 255), 4)
@@ -262,6 +301,7 @@ def main():
 
 	
 	print(f"STARTING EXECUTION......")
+	print(f"Using: windows" if operatingSys == "nt" else "Using: mac/linux")
 	start = timer()
 	files = os.listdir(path)
 	arg = [path+"/"+x for x in files if os.path.isfile(path+"/"+x)]
@@ -286,10 +326,13 @@ def main():
 
 	sorted_data = []
 	for index, data in enumerate(results.get()):
-		#print(f"data sample: {index}, Image name: {data[0]}, Grip Distance: {data[1]}, Nail Width: {data[2]}, Benchmark Height: {data[3]}")
 		sorted_data.append(data)
 	del results
 	sorted_data = sorted(sorted_data, key = sorter)
+
+
+		#for x in sorted_data:
+			#print(f"Data Sample: {i}, Image name: {x[0]}, Grip Distance: {x[1]} px, Nail Width: {x[2]} px, Benchmark Height: {x[3]} px")
 
 	if args.output == "video" or args.output == "Video":
 		compile_video(sorted_data, dSet, outputpath)
