@@ -28,6 +28,10 @@ For windows follow this tutorial: https://www.howtogeek.com/670447/how-to-copy-t
 
 For mac/linux follow this tutorial: https://themacbeginner.com/copy-full-path-file-folder-finder-mac-osx/
 
+  
+## NOTE: You will only have to do the above steps once. After it is setup on your computer, you can start off right below line.
+  ### Running the Program
+
 NOTE: The end of your path, should be the name of the folder. By default this should be "MechE_Nail_Statistics-main", if it is not (and you didn't change the folder name), the next steps will not work. However, if you changed the folder name, it will need to end with whatever you changed it to. 
 
 Now that you have the path, we can create the conda environment. To do this open up conda with the methods I provided in the conda installation section. Once conda is opened type in the following line (replacing ENTER_PATH_HERE with the path you have copied):
@@ -47,9 +51,7 @@ For mac/linux:
   conda activate nm-py39
   ``` 
   You should see ```(nm-py39)``` as the first part of the line in the conda terminal. If you still see ```(base)``` then the environment was either created wrong, or you typed in the wrong command. Retry the steps above if that happens. 
-  
-## NOTE: You will only have to do the above steps once. After it is setup on your computer, you can start off right below line.
-  ### Running the Program
+
   When you're ready to run the program, first you will need to find the path to the image folder you wish to preform calculations on. To do this the steps are the same as above for finding a path name, except you are looking for the image folder. Once you have that found, you will enter the line below into your terminal, replacing ENTER_PATH_TO_PROGRAM_HERE with the path to the program, and ENTER_PATH_TO_IMAGES_HERE with the path to the image folder. Note that there are spaces after each: ```python``` ```PATH_TO_PROGRAM``` ```PATH_TO_IMAGES``` ```options```
   ### Options
   The options entry allows for the user to pick what kind of output they want. Entering ```csv``` will output only a csv file of the nail metrics, ```video``` will output only a video of the found metrics, ```all``` will output both a video and csv file. Note you do not use ```""``` around the option you end up choosing, for example if we wanted the csv file only we would simply put: ```csv``` in the options entry NOT ```"csv"```.
