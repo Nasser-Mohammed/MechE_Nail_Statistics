@@ -29,7 +29,7 @@ For windows follow this tutorial: https://www.howtogeek.com/670447/how-to-copy-t
 For mac/linux follow this tutorial: https://themacbeginner.com/copy-full-path-file-folder-finder-mac-osx/
 
   
-## NOTE: You will only have to do the above steps once. After it is setup on your computer, you can start off right below line.
+## NOTE: You will only have to do the steps above once. After it is setup on your computer, you can start at the step right below this line.
   ### Running the Program
 
 NOTE: The end of your path, should be the name of the folder. By default this should be "MechE_Nail_Statistics-main", if it is not (and you didn't change the folder name), the next steps will not work. However, if you changed the folder name, it will need to end with whatever you changed it to. 
