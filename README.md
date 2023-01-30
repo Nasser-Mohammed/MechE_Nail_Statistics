@@ -5,15 +5,6 @@ Nail_Metrics is an OpenCV based program created for experimental research in Mat
 ![image](https://user-images.githubusercontent.com/81037208/214440084-b48a0acd-fc72-4514-8a2b-fdc531b6e3c7.png)
 
 
-
-
-
-https://user-images.githubusercontent.com/81037208/215588309-deaa7db4-99ae-465a-8443-18a8bd79d98b.mp4
-
-
-
-
-
 ## Note
 OpenCV and imutils downloaded through conda channel will not work. Allow for pip packages to override the packages installed through conda channels. 
 
