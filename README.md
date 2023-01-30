@@ -6,7 +6,9 @@ Nail_Metrics is an OpenCV based program created for experimental research in Mat
 
 
 
-https://user-images.githubusercontent.com/81037208/215588079-a2528887-2c02-482a-9d41-856b00b6f339.mp4
+
+
+https://user-images.githubusercontent.com/81037208/215588309-deaa7db4-99ae-465a-8443-18a8bd79d98b.mp4
 
 
 
