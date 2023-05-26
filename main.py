@@ -141,7 +141,7 @@ def benchmark(img, original, nail_cords, top_grip, bottom_grip):
 	elif len(benchmark_cnts) == 2:
 		#we need to check if they're valid, by testing if they're in the nail, not contained within the same grips
 		benchmark1  = cv2.boundingRect(benchmark_cnts[0])
-		benchmark1  = cv2.boundingRect(benchmark_cnts[1])
+		benchmark2  = cv2.boundingRect(benchmark_cnts[1])
 		benchmark1, benchmark2 = benchmark_validity(nail_cords, benchmark1, benchmark2, top_grip, bottom_grip)
 		bl = tempcheck(benchmark1, 1)
 		if bl == False:
