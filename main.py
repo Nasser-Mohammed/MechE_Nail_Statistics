@@ -219,9 +219,6 @@ def find_grips(image):
 	grip_cnts = imutils.grab_contours(cv2.findContours(filled_grip, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
 	grip_cnts = sorted(grip_cnts, key = cv2.contourArea, reverse = True)[:2]
 
-	grip1 = cv2.boundingRect(grip_cnts[0])
-	grip2 = cv2.boundingRect(grip_cnts[1])
-
 	kernelWidth3 = int(gray.shape[1]/70)
 	kernelWidth4 = int(gray.shape[1]/245)
 	kernelHeight1 = int(gray.shape[0]/2.92)
