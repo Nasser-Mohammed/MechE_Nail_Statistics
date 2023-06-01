@@ -84,7 +84,7 @@ def tempcheck(benchmark1, num):
 #def benchmark(): function that finds the benchmarks within the nail for measurement, and returns it's coordinates
 def find_darkest_cnts(contours, nail_cords, blur, top_grip, bottom_grip, condition_num):
 	rect_list = [cv2.boundingRect(c) for c in contours]
-	rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - 65 and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + 65 and rect[1]*rect[3] > 10000]
+	rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - int(blur.shape[1]/37.66) and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + int(blur.shape[1]/37.66) and rect[1]*rect[3] > int((blur.shape[0]*blur.shape[1])/501.35)]
 	rect_list = sorted(rect_list, key = lambda rect:rect[1]+rect[3], reverse = False)
 	if len(rect_list) <= 1:
 		return (0,0,0,0), (0,0,0,0)
@@ -100,7 +100,7 @@ def find_darkest_cnts(contours, nail_cords, blur, top_grip, bottom_grip, conditi
 			lastCombined = False
 			continue
 
-		if rect_list[i][1] - (rect_list[i-1][1] + rect_list[i-1][3]) <= 75 and rect_list[i][1] - (rect_list[i-1][1] + rect_list[i-1][3]) > 0:
+		if rect_list[i][1] - (rect_list[i-1][1] + rect_list[i-1][3]) <= (blur.shape[0]/27.3) and rect_list[i][1] - (rect_list[i-1][1] + rect_list[i-1][3]) > 0:
 			lastCombined = True
 			if rect_list[i][0] < rect_list[i-1][0]:
 				start = rect_list[i][0]
@@ -143,11 +143,15 @@ def benchmark(img, original, nail_cords, top_grip, bottom_grip):
 	blur = cv2.GaussianBlur(img, (3, 3), 0)
 	thresh = cv2.threshold(blur, 40, 255, cv2.THRESH_BINARY_INV)[1]
 
-	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (45, 1)) #(50,1)
+	kernelWidth1 = int(blur.shape[1]/54.5)
+	kernelWidth2 = int(blur.shape[1]/70)
+	kernelHeight1 = int(blur.shape[0]/683)
+
+	benchmark_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth1, 1)) #(50,1)
 	detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, benchmark_kernel, iterations = 2)
 
 
-	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 3)) #(30, 3)
+	benchmark_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth2, kernelHeight1)) #(30, 3)
 	second_transformation = cv2.morphologyEx(detect_horizontal, cv2.MORPH_OPEN, benchmark_kernel2, iterations=3)
 	
 
@@ -172,11 +176,11 @@ def benchmark(img, original, nail_cords, top_grip, bottom_grip):
 	else:
 		#1) remove any contours not in the nail
 		rect_list = [cv2.boundingRect(c) for c in benchmark_cnts]
-		rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - 65 and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + 65]
+		rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - int(blur.shape[1]/37.6) and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + int(blur.shape[1]/37.6)]
 		#step 2) try to find benchmarks based off of contour size, ours are usuallly 11000 to 16000
 
 		if len(rect_list) > 2:
-			rect_list = [rect for rect in rect_list if int(rect[2]*rect[3]) <= 45000 and int(rect[2]*rect[3]) >= 10000]
+			rect_list = [rect for rect in rect_list if int(rect[2]*rect[3]) <= int((blur.shape[0]*blur.shape[1])/1114) and int(rect[2]*rect[3]) >= int((blur.shape[0]*blur.shape[1])/371)]
 			if len(rect_list) < 2 or len(rect_list) > 2:
 				#cannot distinguish by size
 				#try to find the darkest area of original contours:
@@ -205,7 +209,7 @@ def benchmark(img, original, nail_cords, top_grip, bottom_grip):
 		else:
 
 			rect_list = [cv2.boundingRect(c) for c in benchmark_cnts]
-			rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - 150 and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + 150]
+			rect_list = [rect for rect in rect_list if rect[0] > nail_cords[0] - int(blur.shape[1]/16.32) and rect[0] + rect[2] < nail_cords[0] + nail_cords[2] + int(blur.shape[1]/16.32)]
 			if len(rect_list) == 2:
 				benchmark1, benchmark2 = benchmark_validity(nail_cords, rect_list[0], rect_list[1], top_grip, bottom_grip)
 				bl = tempcheck(benchmark1, 6)
@@ -228,29 +232,39 @@ def find_grips(image):
 	blur = cv2.GaussianBlur(gray, (3,3), 0)
 
 	thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-	grip_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (100, 3))
+	kernelWidth1 = int(gray.shape[1]/25)
+	kernelWidth2 = int(gray.shape[1]/33)
+	grip_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth1, 3))
 	detect_grip = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, grip_kernel, iterations = 2)
-	
 
-	fill_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (75, 75))
+
+	fill_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth2, kernelWidth2))
 	filled_grip = cv2.morphologyEx(detect_grip, cv2.MORPH_CLOSE, fill_kernel, iterations = 3)
+
 	grip_cnts = imutils.grab_contours(cv2.findContours(filled_grip, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE))
 	grip_cnts = sorted(grip_cnts, key = cv2.contourArea, reverse = True)[:2]
 
-	nail_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 35))
+	grip1 = cv2.boundingRect(grip_cnts[0])
+	grip2 = cv2.boundingRect(grip_cnts[1])
+
+	kernelWidth3 = int(gray.shape[1]/70)
+	kernelWidth4 = int(gray.shape[1]/245)
+	kernelHeight1 = int(gray.shape[0]/2.92)
+	nail_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth3, kernelWidth3))
 	fill_nail = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, nail_kernel, iterations = 3)
-	
-	nail_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 700))
+
+	nail_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth4, kernelHeight1))
 	detect_nail = cv2.morphologyEx(fill_nail, cv2.MORPH_OPEN, nail_kernel2, iterations = 3)
 	nail_cnts = imutils.grab_contours(cv2.findContours(detect_nail, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
+	nail_cnts = sorted(nail_cnts, key = cv2.contourArea, reverse = True)
 
 	if len(nail_cnts) >= 1:
 		nail_cords = cv2.boundingRect(nail_cnts[0])
 	else:
 		new_thresh = cv2.threshold(blur, 180, 255, cv2.THRESH_BINARY_INV)[1]
-		nail_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (35, 35))
+		nail_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth3, kernelWidth3))
 		fill_nail = cv2.morphologyEx(new_thresh, cv2.MORPH_CLOSE, nail_kernel, iterations = 3)
-		nail_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 700))
+		nail_kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelWidth4, kernelHeight1))
 		detect_nail = cv2.morphologyEx(fill_nail, cv2.MORPH_OPEN, nail_kernel2, iterations = 3)
 		nail_cnts = imutils.grab_contours(cv2.findContours(detect_nail, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
 
