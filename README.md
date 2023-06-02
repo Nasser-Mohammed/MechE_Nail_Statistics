@@ -1,6 +1,6 @@
 # Nail Metrics
 ## About
-Nail_Metrics is an OpenCV based program created for experimental research in Materials Science for the Mechanical Engineering Department at LSU. It utilizes multiprocessesing for faster execution.
+Nail_Metrics is an OpenCV based program created for experimental research in Materials Science for the Mechanical Engineering Department at LSU. It utilizes multiprocessesing for faster execution, and ouputs your choice of a CSV, video, or both.
 
 ## Below is a trimmed sample output of the video option
 https://user-images.githubusercontent.com/81037208/215588830-b8ca38a3-f3e1-470b-9250-0ee079c60f37.mp4
